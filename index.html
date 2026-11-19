@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus Hub</title>
+  <style>
+    :root {
+      --bg-darkest: #0f0d15;
+      --bg-sidebar: #14111d;
+      --bg-channels: #191524;
+      --bg-chat: #120f1a;
+      --bg-members: #15121f;
+      --bg-card: #1f1a2e;
+      --bg-hover: #262038;
+      --accent-purple: #9333ea;
+      --accent-purple-hover: #a855f7;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border-color: #272236;
+      --green-online: #22c55e;
+      --gold-badge: #eab308;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Inter, system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-darkest);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2e2842;
+      border-radius: 3px;
+    }
+
+    /* 1. Left Main Navigation Sidebar */
+    .left-nav {
+      width: 220px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14px 10px;
+      flex-shrink: 0;
+    }
+
+    .brand-header {
+      padding: 4px 8px 14px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 10px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #c084fc;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .online-counter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      margin-top: 8px;
+      color: var(--text-muted);
+    }
+
+    .dot-online {
+      width: 8px;
+      height: 8px;
+      background-color: var(--green-online);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #d1d5db;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .nav-item:hover {
+      background-color: var(--bg-hover);
+      color: #fff;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, #9333ea, #7e22ce);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 10px rgba(147, 51, 234, 0.35);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-new {
+      background-color: #ca8a04;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .user-footer {
+      padding: 10px 8px 2px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #9333ea, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .avatar-status {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: var(--green-online);
+      border: 2px solid var(--bg-sidebar);
+    }
+
+    .avatar-status.offline {
+      background-color: #6b7280;
+    }
+
+    /* 2. Center Area (Top Bar + Channels + Chat + Members) */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .top-utility-bar {
+      height: 44px;
+      background-color: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 12px;
+    }
+
+    .currency-pill {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #e9d5ff;
+      font-weight: 600;
+    }
+
+    .top-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--text-muted);
+    }
+
+    .top-link {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.15s;
+    }
+
+    .top-link:hover {
+      color: #fff;
+    }
+
+    .content-columns {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Channel List Column */
+    .channels-col {
+      width: 215px;
+      background-color: var(--bg-channels);
+      border-right: 1px solid var(--border-color);
+      padding: 12px 10px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .friends-btn {
+      width: 100%;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .friends-btn:hover {
+      background-color: var(--bg-hover);
+    }
+
+    .cat-header {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      margin: 14px 6px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .channel-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 2px;
+    }
+
+    .channel-item:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    .channel-item.active {
+      background-color: #2b2240;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Chat Area Column */
+    .chat-col {
+      flex: 1;
+      background-color: var(--bg-chat);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .chat-header {
+      height: 52px;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-title-group h3 {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chat-title-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .messages-feed {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      user-select: text;
+    }
+
+    .msg-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .msg-row.own {
+      flex-direction: row-reverse;
+    }
+
+    .msg-content-wrap {
+      max-width: 72%;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .msg-row.own .msg-content-wrap {
+      align-items: flex-end;
+    }
+
+    .msg-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .msg-author {
+      font-weight: 700;
+      color: #f87171;
+    }
+
+    .role-tag {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid var(--gold-badge);
+      color: var(--gold-badge);
+      background: rgba(234, 179, 8, 0.12);
+    }
+
+    .msg-time {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .msg-bubble {
+      background-color: var(--bg-card);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      color: #f3f4f6;
+      border: 1px solid var(--border-color);
+    }
+
+    .msg-row.own .msg-bubble {
+      background: linear-gradient(135deg, #9333ea, #7e22ce);
+      border: none;
+      color: #fff;
+    }
+
+    .translate-hint {
+      font-size: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-top: 2px;
+    }
+
+    .translate-hint:hover {
+      color: #c084fc;
+    }
+
+    /* Chat Input */
+    .chat-input-area {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-sidebar);
+    }
+
+    .chat-form {
+      display: flex;
+      gap: 10px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 6px 12px;
+      align-items: center;
+    }
+
+    .chat-form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 13.5px;
+      padding: 6px 0;
+    }
+
+    .send-btn {
+      background-color: var(--accent-purple);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .send-btn:hover {
+      background-color: var(--accent-purple-hover);
+    }
+
+    /* Right Members Sidebar */
+    .members-col {
+      width: 210px;
+      background-color: var(--bg-members);
+      border-left: 1px solid var(--border-color);
+      padding: 14px 12px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .member-group-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.7px;
+      margin: 14px 0 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .member-card {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .member-card:hover {
+      background-color: var(--bg-hover);
+    }
+
+    .member-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .member-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .member-role {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Placeholder View for Other Tabs */
+    .tab-placeholder {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      background-color: var(--bg-chat);
+    }
+
+    .tab-placeholder h2 {
+      font-size: 22px;
+      color: #c084fc;
+      margin-bottom: 8px;
+    }
+
+    .tab-placeholder p {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left Main Navigation -->
+  <aside class="left-nav">
+    <div>
+      <div class="brand-header">
+        <div class="brand-title">🌐 Nexus Hub</div>
+        <div class="brand-sub">Unblocked Hub</div>
+        <div class="online-counter">
+          <span class="dot-online"></span>
+          <span style="color: #4ade80; font-weight: 600;">1 online</span> / 17 total
+        </div>
+      </div>
+
+      <ul class="nav-list" id="mainNav">
+        <li class="nav-item active" data-view="chat">
+          <span class="nav-left">💬 Chat</span>
+        </li>
+        <li class="nav-item" data-view="VIP Lounge">
+          <span class="nav-left">👑 VIP</span>
+        </li>
+        <li class="nav-item" data-view="Video Rooms">
+          <span class="nav-left">📹 Video Rooms</span>
+        </li>
+        <li class="nav-item" data-view="Art Studio">
+          <span class="nav-left">🖌️ Art Studio</span>
+        </li>
+        <li class="nav-item" data-view="Emoji Mixer">
+          <span class="nav-left">😊 Emoji Mixer</span>
+        </li>
+        <li class="nav-item" data-view="Casino">
+          <span class="nav-left">🎲 Casino</span>
+          <span class="badge-new">NEW</span>
+        </li>
+        <li class="nav-item" data-view="Leaderboard">
+          <span class="nav-left">🏆 Leaderboard</span>
+        </li>
+        <li class="nav-item" data-view="Tournament">
+          <span class="nav-left">⚔️ Tournament</span>
+        </li>
+        <li class="nav-item" data-view="Theater">
+          <span class="nav-left">🎬 Theater</span>
+        </li>
+        <li class="nav-item" data-view="AI Assistant">
+          <span class="nav-left">🤖 AI Assistant</span>
+        </li>
+        <li class="nav-item" data-view="Browser">
+          <span class="nav-left">🧭 Browser</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="user-footer">
+      <div class="avatar">
+        JH
+        <span class="avatar-status"></span>
+      </div>
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: #f87171;">JaydenHacker</div>
+        <div style="font-size: 10px; color: #eab308;">● Owner</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="main-wrapper">
+    <!-- Top Bar -->
+    <header class="top-utility-bar">
+      <div class="currency-pill">💎 ∞</div>
+      <div class="top-links">
+        <span class="top-link" onclick="alert('Limited items shop opened!')">🏷️ Limited</span>
+        <span class="top-link" onclick="alert('Nexus Shop opened!')">🛍️ Shop</span>
+        <span class="top-link" onclick="alert('Daily Quests: 3/3 ready!')">🎯 Quests</span>
+        <span class="top-link" onclick="alert('Send feedback to JaydenHacker')">📣 Feedback</span>
+        <span class="top-link" onclick="alert('Marketplace opened!')">🏪 Marketplace</span>
+      </div>
+    </header>
+
+    <!-- Chat View Columns -->
+    <div class="content-columns" id="chatWorkspace">
+      <!-- Channel Sidebar -->
+      <div class="channels-col">
+        <button class="friends-btn" onclick="alert('Friends list: 1 online')">👥 Friends</button>
+
+        <div class="cat-header">GLOBAL</div>
+        <div class="channel-item active" data-channel="Global Chat" data-desc="Everyone is here">
+          <span># 🌐</span> Global Chat
+        </div>
+
+        <div class="cat-header">ROLE ROOMS</div>
+        <div class="channel-item" data-channel="Owner Lounge" data-desc="Owners only">
+          <span># 👑</span> Owner Lounge
+        </div>
+        <div class="channel-item" data-channel="Co-Owner Room" data-desc="Co-Owners & staff">
+          <span># 🔴</span> Co-Owner Room
+        </div>
+        <div class="channel-item" data-channel="Admin Room" data-desc="Admin coordination">
+          <span># 🛡️</span> Admin Room
+        </div>
+        <div class="channel-item" data-channel="Senior Mod Room" data-desc="Senior moderation">
+          <span># 🟣</span> Senior Mod Room
+        </div>
+        <div class="channel-item" data-channel="Mod Room" data-desc="Moderators chat">
+          <span># 🔵</span> Mod Room
+        </div>
+        <div class="channel-item" data-channel="Helper Room" data-desc="Community helpers">
+          <span># 🟢</span> Helper Room
+        </div>
+        <div class="channel-item" data-channel="Guardian Room" data-desc="Security & guardians">
+          <span># 💠</span> Guardian Room
+        </div>
+        <div class="channel-item" data-channel="VIP Lounge" data-desc="Exclusive VIP hangout">
+          <span># ⭐</span> VIP Lounge
+        </div>
+
+        <div class="cat-header"><span>GROUPS</span> <span>+</span></div>
+        <div class="cat-header"><span>DIRECT MESSAGES</span> <span>+</span></div>
+      </div>
+
+      <!-- Center Chat Feed -->
+      <main class="chat-col">
+        <div class="chat-header">
+          <div class="chat-title-group">
+            <h3 id="activeChannelTitle">🌐 Global Chat</h3>
+            <p id="activeChannelDesc">Everyone is here</p>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">👥 2</div>
+        </div>
+
+        <div class="messages-feed" id="messagesFeed">
+          <!-- Messages injected by JS -->
+        </div>
+
+        <div class="chat-input-area">
+          <form class="chat-form" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Message #Global Chat..." autocomplete="off" />
+            <button type="submit" class="send-btn">Send</button>
+          </form>
+        </div>
+      </main>
+
+      <!-- Right Member List -->
+      <aside class="members-col">
+        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #4ade80;">
+          <span>● ONLINE</span>
+          <span>1</span>
+        </div>
+        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 10px;">
+          Online first, then offline members
+        </div>
+
+        <div class="member-group-title"><span>STAFF — 4</span></div>
+
+        <div class="member-card">
+          <div class="avatar" style="width: 28px; height: 28px; font-size: 11px;">
+            JH <span class="avatar-status"></span>
+          </div>
+          <div class="member-info">
+            <span class="member-name" style="color: #f87171;">JaydenHacker (you)</span>
+            <span class="member-role" style="color: #eab308;">● Owner</span>
+          </div>
+        </div>
+
+        <div class="member-card">
+          <div class="avatar" style="width: 28px; height: 28px; font-size: 11px; background: #4c1d95;">
+            OG <span class="avatar-status offline"></span>
+          </div>
+          <div class="member-info">
+            <span class="member-name" style="color: #f472b6;">Owner GF</span>
+            <span class="member-role">● Owner</span>
+          </div>
+        </div>
+
+        <div class="member-card">
+          <div class="avatar" style="width: 28px; height: 28px; font-size: 11px; background: #1e3a8a;">
+            JA <span class="avatar-status offline"></span>
+          </div>
+          <div class="member-info">
+            <span class="member-name">jaydenaltfirst</span>
+            <span class="member-role">● Co-Owner</span>
+          </div>
+        </div>
+
+        <div class="member-card">
+          <div class="avatar" style="width: 28px; height: 28px; font-size: 11px; background: #065f46;">
+            CJ <span class="avatar-status offline"></span>
+          </div>
+          <div class="member-info">
+            <span class="member-name">chickenjoj67</span>
+            <span class="member-role">● Admin</span>
+          </div>
+        </div>
+
+        <div class="member-group-title"><span>USERS — 13</span></div>
+
+        <div class="member-card">
+          <div class="avatar" style="width: 28px; height: 28px; font-size: 11px; background: #374151;">
+            C <span class="avatar-status offline"></span>
+          </div>
+          <div class="member-info">
+            <span class="member-name" style="color: #9ca3af;">Carter</span>
+            <span class="member-role">● User</span>
+          </div>
+        </div>
+
+        <div class="member-card">
+          <div class="avatar" style="width: 28px; height: 28px; font-size: 11px; background: #374151;">
+            E <span class="avatar-status offline"></span>
+          </div>
+          <div class="member-info">
+            <span class="member-name" style="color: #9ca3af;">elicoffman1</span>
+            <span class="member-role">● User</span>
+          </div>
+        </div>
+
+        <div class="member-card">
+          <div class="avatar" style="width: 28px; height: 28px; font-size: 11px; background: #374151;">
+            H <span class="avatar-status offline"></span>
+          </div>
+          <div class="member-info">
+            <span class="member-name" style="color: #9ca3af;">hundo_percent</span>
+            <span class="member-role">● User</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Placeholder view when clicking Casino, Art Studio, Browser, etc. -->
+    <div class="tab-placeholder" id="modulePlaceholder">
+      <h2 id="moduleTitle">Module Name</h2>
+      <p>This Nexus Hub module is ready to be connected. Click <strong>Chat</strong> in the left sidebar to return to the rooms.</p>
+    </div>
+  </div>
+
+  <script>
+    // Initial chat history matching your screenshot
+    const channelMessages = {
+      "Global Chat": [
+        { author: "OWNER GF", role: "OWNER GF", time: "12:52 AM", text: "the songs by Sean Paul?", own: false },
+        { author: "OWNER GF", role: "OWNER GF", time: "12:54 AM", text: "and do you sing?", own: false },
+        { author: "OWNER GF", role: "OWNER GF", time: "02:27 AM", text: "or play any instruments?", own: false },
+        { author: "JaydenHacker", role: "OWNER", time: "03:15 AM", text: "I had played", own: true }
+      ],
+      "Owner Lounge": [
+        { author: "JaydenHacker", role: "OWNER", time: "09:00 AM", text: "Welcome to the Owner Lounge.", own: true }
+      ]
+    };
+
+    let currentChannel = "Global Chat";
+    const feed = document.getElementById("messagesFeed");
+    const chatForm = document.getElementById("chatForm");
+    const chatInput = document.getElementById("chatInput");
+
+    function renderMessages() {
+      feed.innerHTML = "";
+      const msgs = channelMessages[currentChannel] || [
+        { author: "System", role: "BOT", time: "Now", text: `Welcome to #${currentChannel}! Start the conversation.`, own: false }
+      ];
+
+      msgs.forEach(m => {
+        const row = document.createElement("div");
+        row.className = `msg-row ${m.own ? "own" : ""}`;
+
+        row.innerHTML = `
+          <div class="avatar" style="width: 32px; height: 32px; font-size: 12px;">
+            ${m.own ? "JH" : "👑"}
+          </div>
+          <div class="msg-content-wrap">
+            <div class="msg-meta">
+              <span class="msg-author" style="color: ${m.own ? "#f87171" : "#f472b6"}">${m.author}</span>
+              <span class="role-tag">👑 ${m.role}</span>
+              <span class="msg-time">${m.time}</span>
+            </div>
+            <div class="msg-bubble">${escapeHTML(m.text)}</div>
+            ${!m.own ? `<span class="translate-hint" onclick="alert('Translated: ${escapeHTML(m.text)}')">文A translate</span>` : ""}
+          </div>
+        `;
+        feed.appendChild(row);
+      });
+
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag]));
+    }
+
+    // Send new message
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      if (!channelMessages[currentChannel]) {
+        channelMessages[currentChannel] = [];
+      }
+
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      channelMessages[currentChannel].push({
+        author: "JaydenHacker",
+        role: "OWNER",
+        time: now,
+        text: text,
+        own: true
+      });
+
+      chatInput.value = "";
+      renderMessages();
+    });
+
+    // Switch Channels
+    document.querySelectorAll(".channel-item").forEach(item => {
+      item.addEventListener("click", () => {
+        document.querySelectorAll(".channel-item").forEach(c => c.classList.remove("active"));
+        item.classList.add("active");
+
+        currentChannel = item.dataset.channel;
+        document.getElementById("activeChannelTitle").textContent = `🌐 ${currentChannel}`;
+        document.getElementById("activeChannelDesc").textContent = item.dataset.desc;
+        chatInput.placeholder = `Message #${currentChannel}...`;
+        renderMessages();
+      });
+    });
+
+    // Switch Main Left Sidebar Modules
+    document.querySelectorAll(".nav-item").forEach(nav => {
+      nav.addEventListener("click", () => {
+        document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+        nav.classList.add("active");
+
+        const view = nav.dataset.view;
+        const workspace = document.getElementById("chatWorkspace");
+        const placeholder = document.getElementById("modulePlaceholder");
+
+        if (view === "chat") {
+          workspace.style.display = "flex";
+          placeholder.style.display = "none";
+        } else {
+          workspace.style.display = "none";
+          placeholder.style.display = "flex";
+          document.getElementById("moduleTitle").textContent = view;
+        }
+      });
+    });
+
+    renderMessages();
+  </script>
+</body>
+</html>
